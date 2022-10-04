@@ -16,14 +16,16 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
-    webPreferences: { nodeIntegration: true },
+    webPreferences: {
+      preload: path.join(__dirname, "electron-preload.js"),
+    },
   });
 
   // and load the index.html of the app.
   const startUrl =
     process.env.ELECTRON_START_URL ||
     url.format({
-      pathname: path.join(__dirname, "/../build/index.html"),
+      pathname: path.join(__dirname, "/../../build/index.html"),
       protocol: "file:",
       slashes: true,
     });
@@ -64,3 +66,12 @@ app.on("activate", function () {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
+// In case you have code that cannot/should not be executed in the browser,
+// add the logic here.
+const { ipcMain } = require("electron");
+const fs = require("fs");
+
+ipcMain.handle("exampleFunction", (event, args) => {
+  console.log("Read files in", __dirname, ": ", fs.readdirSync(__dirname));
+  return `backend task: done. You passed the arg: ${args}`;
+});
